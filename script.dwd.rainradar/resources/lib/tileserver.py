@@ -7,6 +7,7 @@ Kartenausschnitt. Die Vektordaten holt er weiterhin online bei OpenFreeMap.
 import json
 import math
 import os
+import shlex
 import shutil
 import subprocess
 import time
@@ -29,6 +30,9 @@ DOCKER_PATHS = ("/storage/.kodi/addons/service.system.docker/bin/docker",)
 # Der erste Start lädt das Image (rund 1,2 GB).
 PULL_TIMEOUT = 3600
 START_TIMEOUT = 90
+# Wartezeit, bevor ein fehlender Add-on-Ordner als Deinstallation gilt. Bei
+# einem Update fehlt er nur für wenige Sekunden.
+CLEANUP_DELAY = 30
 
 CONFIG = {
     "options": {
@@ -161,3 +165,30 @@ def ensure(data_dir, run=_run, opener=urlopen, is_healthy=healthy,
     if code != 0:
         raise SetupError("Docker: %s" % (out.splitlines()[-1] if out else "Fehler %d" % code))
     raise SetupError("Kartenserver antwortet nicht")
+
+
+def cleanup_command(docker, addon_dir, delay=CLEANUP_DELAY):
+    """Shell-Befehl: entfernt Container und Image, wenn das Add-on danach fehlt."""
+    marker = shlex.quote(os.path.join(addon_dir, "addon.xml"))
+    docker = shlex.quote(docker)
+    return "sleep %d; [ -e %s ] || { %s rm -f %s; %s rmi %s; }" % (
+        delay, marker, docker, CONTAINER, docker, IMAGE)
+
+
+def schedule_cleanup(addon_dir, popen=subprocess.Popen):
+    """Räumt nach einer Deinstallation auf.
+
+    Kodi meldet Add-ons ihre Deinstallation nicht, es beendet nur den Dienst,
+    genau wie beim Herunterfahren oder Deaktivieren. Deshalb prüft ein von
+    Kodi losgelöster Prozess etwas später, ob das Add-on noch da ist.
+    """
+    docker = find_docker()
+    if not docker:
+        return False
+    devnull = subprocess.DEVNULL
+    try:
+        popen(["/bin/sh", "-c", cleanup_command(docker, addon_dir)], stdin=devnull,
+              stdout=devnull, stderr=devnull, start_new_session=True, close_fds=True)
+    except OSError:
+        return False
+    return True

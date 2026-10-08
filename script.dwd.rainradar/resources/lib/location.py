@@ -19,23 +19,29 @@ def _ipwhois(d):
     return d.get("latitude"), d.get("longitude"), d.get("city") or ""
 
 
-def _ipapi(d):
-    if d.get("status") != "success":
-        return None
-    return d.get("lat"), d.get("lon"), d.get("city") or ""
-
-
 def _freeipapi(d):
     return d.get("latitude"), d.get("longitude"), d.get("cityName") or ""
 
 
 # Reihenfolge nach Erfahrung: freeipapi lag beim Test einmal auf dem
 # Provider-Knoten (Frankfurt statt Berlin), daher nur als letzte Wahl.
+# Nur HTTPS: Eine unverschlüsselte Antwort könnte unterwegs verändert werden.
 SERVICES = [
     ("https://ipwho.is/", _ipwhois),
-    ("http://ip-api.com/json/", _ipapi),
     ("https://freeipapi.com/api/json", _freeipapi),
 ]
+
+
+def _clean(result):
+    """Prüft eine Antwort und liefert (lat, lon, stadt) oder None."""
+    if not result or result[0] is None or result[1] is None:
+        return None
+    lat, lon = float(result[0]), float(result[1])
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+        return None
+    # Der Ortsname landet in einem Kodi-Label; eckige Klammern wären dort Formatierung.
+    city = "".join(c for c in str(result[2]) if c.isprintable() and c not in "[]")
+    return lat, lon, city[:40]
 
 
 def lookup(opener=urlopen, services=SERVICES):
@@ -45,9 +51,9 @@ def lookup(opener=urlopen, services=SERVICES):
             req = Request(url, headers={"User-Agent": USER_AGENT})
             with opener(req, timeout=TIMEOUT) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-            result = parse(data)
-            if result and result[0] is not None and result[1] is not None:
-                return float(result[0]), float(result[1]), result[2]
+            result = _clean(parse(data))
+            if result:
+                return result
         except Exception:
             continue
     return None

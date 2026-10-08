@@ -183,7 +183,8 @@ class RadarWindow(xbmcgui.Window):
         if result is None:
             log("Standort per IP nicht ermittelbar", xbmc.LOGWARNING)
         else:
-            log("Standort per IP: %.3f, %.3f (%s)" % result)
+            # Ohne Koordinaten: Kodi-Logs werden oft öffentlich geteilt.
+            log("Standort per IP ermittelt")
         self._set_location(result)
 
     def _set_location(self, location):

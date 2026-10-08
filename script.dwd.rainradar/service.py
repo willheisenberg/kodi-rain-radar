@@ -1,4 +1,5 @@
-"""Dienst: richtet nach der Installation und bei jedem Kodi-Start den Kartenserver ein."""
+"""Dienst: richtet nach der Installation und bei jedem Kodi-Start den Kartenserver ein
+und entfernt ihn wieder, wenn das Add-on deinstalliert wird."""
 import os
 import sys
 
@@ -27,8 +28,7 @@ def notify(text, icon=xbmcgui.NOTIFICATION_INFO):
     xbmcgui.Dialog().notification(NAME, text, icon, 8000)
 
 
-def main():
-    monitor = xbmc.Monitor()
+def setup(monitor):
     if tileserver.healthy():
         return
     data_dir = os.path.join(xbmcvfs.translatePath(ADDON.getAddonInfo("profile")), "tileserver")
@@ -52,6 +52,15 @@ def main():
             notify("Kartenserver ist bereit")
         return
     notify("Kartenserver: %s" % error, xbmcgui.NOTIFICATION_ERROR)
+
+
+def main():
+    monitor = xbmc.Monitor()
+    log("Dienst gestartet")
+    setup(monitor)
+    # Kodi beendet den Dienst beim Herunterfahren, Deaktivieren und Deinstallieren.
+    monitor.waitForAbort()
+    tileserver.schedule_cleanup(ADDON_DIR)
 
 
 if __name__ == "__main__":

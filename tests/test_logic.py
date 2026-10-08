@@ -1,5 +1,6 @@
 import os
 import struct
+import subprocess
 import time
 import zlib
 
@@ -126,6 +127,38 @@ def test_tileserver_does_nothing_when_healthy(tmp_path, monkeypatch):
     docker = _Docker(state=(True, tileserver.IMAGE))
     _ensure(tmp_path, docker, monkeypatch, found=None)
     assert docker.calls == []
+
+
+def _run_cleanup(tmp_path, installed):
+    """Führt den Aufräumbefehl mit einem nachgebauten docker aus, liefert dessen Aufrufe."""
+    tmp_path.mkdir()
+    calls = tmp_path / "calls"
+    docker = tmp_path / "docker"
+    docker.write_text('#!/bin/sh\necho "$@" >> "%s"\n' % calls)
+    docker.chmod(0o755)
+    addon = tmp_path / "addon dir"
+    addon.mkdir()
+    if installed:
+        (addon / "addon.xml").write_text("<addon/>")
+    subprocess.check_call(["/bin/sh", "-c", tileserver.cleanup_command(str(docker), str(addon), 0)])
+    return calls.read_text().splitlines() if calls.exists() else []
+
+
+def test_cleanup_only_after_uninstall(tmp_path):
+    assert _run_cleanup(tmp_path / "a", True) == []
+    assert _run_cleanup(tmp_path / "b", False) == [
+        "rm -f dwd-rainradar-tiles", "rmi " + tileserver.IMAGE]
+
+
+def test_schedule_cleanup_detaches_process(monkeypatch):
+    started = []
+    monkeypatch.setattr(tileserver, "find_docker", lambda: "/usr/bin/docker")
+    assert tileserver.schedule_cleanup("/addon", popen=lambda args, **kw: started.append((args, kw)))
+    args, kw = started[0]
+    assert args[:2] == ["/bin/sh", "-c"] and "sleep 30" in args[2]
+    assert kw["start_new_session"] is True
+    monkeypatch.setattr(tileserver, "find_docker", lambda: None)
+    assert not tileserver.schedule_cleanup("/addon")
 
 
 def test_tileserver_reports_errors(tmp_path, monkeypatch):
@@ -279,14 +312,23 @@ def test_fetch_rejects_service_exception():
 def test_location_falls_back_to_next_service():
     answers = {
         "https://a/": b'{"success": false}',
-        "https://b/": b'{"status": "success", "lat": 52.5, "lon": 13.4, "city": "Berlin"}',
+        "https://b/": b'{"latitude": 52.5, "longitude": 13.4, "cityName": "Berlin"}',
     }
 
     def opener(req, timeout):
         return _Resp(answers[req.full_url])
 
-    services = [("https://a/", location._ipwhois), ("https://b/", location._ipapi)]
+    services = [("https://a/", location._ipwhois), ("https://b/", location._freeipapi)]
     assert location.lookup(opener, services) == (52.5, 13.4, "Berlin")
+
+
+def test_location_rejects_implausible_answers():
+    assert all(url.startswith("https://") for url, _ in location.SERVICES)
+    assert location._clean((91.0, 13.4, "x")) is None
+    assert location._clean((52.5, 181, "x")) is None
+    assert location._clean((None, 13.4, "x")) is None
+    assert location._clean(("52.5", "13.4", "[COLOR red]Ber\nlin[/COLOR]" + "x" * 80)) == (
+        52.5, 13.4, ("COLOR redBerlin/COLOR" + "x" * 80)[:40])
 
 
 def test_location_returns_none_when_all_fail():

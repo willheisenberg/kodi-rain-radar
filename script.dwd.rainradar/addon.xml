@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="script.dwd.rainradar" name="DWD Regenradar" version="0.4.0" provider-name="tesla">
+<addon id="script.dwd.rainradar" name="DWD Regenradar" version="0.4.1" provider-name="tesla">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
   </requires>

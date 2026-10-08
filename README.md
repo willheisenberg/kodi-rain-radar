@@ -16,8 +16,8 @@ Wetterdienstes als animierte Vollbildkarte zeigt. Ableger des Plasma-Widgets
 - 1 bis 3 Stunden Verlauf und optional 2 Stunden Vorhersage in 5-Minuten-Schritten
 - Zoomstufen 0 bis 4, gezoomt wird immer auf den eigenen Standort (bis man den
   Ausschnitt von Hand verschiebt)
-- Standort automatisch per IP-Adresse (ipwho.is, Rückfall auf ip-api.com und
-  freeipapi.com, 24 h zwischengespeichert) oder manuell als Koordinaten
+- Standort automatisch per IP-Adresse (ipwho.is, Rückfall auf freeipapi.com,
+  24 h zwischengespeichert) oder manuell als Koordinaten
 - Aktualisiert sich selbst, sobald ein neues Radarbild verfügbar ist
 - Braucht Kodi (≥ 19 Matrix, Python 3) und Docker auf dem Kodi-Gerät
   (LibreELEC: Add-on „Docker“ aus dem LibreELEC-Repository)
@@ -57,8 +57,9 @@ Beim ersten Mal lädt Docker das Image (rund 1,2 GB), das dauert einige Minuten.
 Kodi meldet Beginn und Ende. Solange der Server fehlt, zeigt das Radar keinen
 Kartenhintergrund und oben rechts den Hinweis „Kartenserver wird gestartet“.
 Der Container belegt im Betrieb etwa 600 MB Arbeitsspeicher und ist nur von
-Kodi selbst aus erreichbar (127.0.0.1). Er bleibt nach einer Deinstallation
-des Add-ons bestehen; entfernen mit `docker rm -f dwd-rainradar-tiles`.
+Kodi selbst aus erreichbar (127.0.0.1). Wird das Add-on
+deinstalliert, entfernt der Dienst etwa 30 Sekunden später Container und
+Image. Deaktivieren oder Aktualisieren lässt beides stehen.
 
 ## Technik
 
