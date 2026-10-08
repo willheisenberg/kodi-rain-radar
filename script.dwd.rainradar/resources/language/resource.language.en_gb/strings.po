@@ -1,0 +1,74 @@
+# Kodi Media Center language file
+# Addon id: script.dwd.rainradar
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en_GB\n"
+
+msgctxt "#32000"
+msgid "Location"
+msgstr ""
+
+msgctxt "#32001"
+msgid "Determine location"
+msgstr ""
+
+msgctxt "#32002"
+msgid "The location is marked on the map; zooming in centres on it. Automatic uses your public IP address (city level)."
+msgstr ""
+
+msgctxt "#32003"
+msgid "Automatic (IP address)"
+msgstr ""
+
+msgctxt "#32004"
+msgid "Manual (coordinates)"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Off"
+msgstr ""
+
+msgctxt "#32006"
+msgid "Latitude (e.g. 52.52)"
+msgstr ""
+
+msgctxt "#32007"
+msgid "Longitude (e.g. 13.40)"
+msgstr ""
+
+msgctxt "#32010"
+msgid "View"
+msgstr ""
+
+msgctxt "#32011"
+msgid "Zoom level at start"
+msgstr ""
+
+msgctxt "#32012"
+msgid "0 = whole Germany, 1–4 = increasingly close around your location."
+msgstr ""
+
+msgctxt "#32013"
+msgid "Radar opacity"
+msgstr ""
+
+msgctxt "#32020"
+msgid "Animation"
+msgstr ""
+
+msgctxt "#32021"
+msgid "History (hours)"
+msgstr ""
+
+msgctxt "#32022"
+msgid "Show forecast (2 hours)"
+msgstr ""
+
+msgctxt "#32023"
+msgid "Duration per frame (ms)"
+msgstr ""
+
+msgctxt "#32024"
+msgid "Start animation automatically"
+msgstr ""

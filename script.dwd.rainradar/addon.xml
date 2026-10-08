@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.dwd.rainradar" name="DWD Regenradar" version="0.4.0" provider-name="tesla">
+  <requires>
+    <import addon="xbmc.python" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.script" library="default.py">
+    <provides>executable</provides>
+  </extension>
+  <extension point="xbmc.service" library="service.py"/>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="de_DE">Niederschlagsradar des Deutschen Wetterdienstes mit Verlauf und Vorhersage</summary>
+    <summary lang="en_GB">Precipitation radar of the German Weather Service (DWD) with history and nowcast</summary>
+    <description lang="de_DE">Zeigt das DWD-Niederschlagsradar als animierte Vollbildkarte: bis zu drei Stunden Verlauf und zwei Stunden Vorhersage, Zoom auf den eigenen Standort, Bedienung komplett per Fernbedienung. Daten: Deutscher Wetterdienst (maps.dwd.de).</description>
+    <description lang="en_GB">Shows the DWD precipitation radar as an animated fullscreen map: up to three hours of history and two hours of nowcast, zoom to your location, fully remote-controllable. Data: Deutscher Wetterdienst (maps.dwd.de).</description>
+    <platform>all</platform>
+    <license>MIT</license>
+    <assets>
+      <icon>icon.png</icon>
+    </assets>
+  </extension>
+</addon>
